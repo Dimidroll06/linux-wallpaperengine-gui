@@ -1,0 +1,11 @@
+{
+  "reportUnknownMemberType": false,
+  "executionEnvironments": [
+    {
+      "root": "${workspaceFolder}"
+    }
+  ],
+  "extraPaths": [
+    "${workspaceFolder}"
+  ]
+}
