@@ -7,8 +7,7 @@ from src.models.wallpaper import (ComboOptions, Wallpaper,
                                   WallpaperBooleanProperty,
                                   WallpaperColorProperty,
                                   WallpaperComboProperty,
-                                  WallpaperFileProperty, WallpaperProperty,
-                                  WallpaperPropertyType,
+                                  WallpaperFileProperty, WallpaperPropertyType,
                                   WallpaperSliderProperty,
                                   WallpaperTextinputProperty, WallpaperType)
 
@@ -27,173 +26,189 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
         if not project_path.exists():
             continue
 
-        project_file = open(str(project_path), "r")
         try:
-            project = json.load(project_file)
+            with open(project_path, "r") as project_file:
+                project = json.load(project_file)
         except Exception as e:
             print(f"[WallpaperLoader] Error parsing json: {e}")
-            project_file.close()
             continue
 
         wallpaper = Wallpaper()
-        if project["contentrating"] is str:
-            wallpaper.contentrating = project["contentrating"]
 
-        if project["file"] is str:
-            wallpaper.file = wallpaper_folder / project["file"]
+        contentrating = project.get("contentrating")
+        if isinstance(contentrating, str):
+            wallpaper.contentrating = contentrating
 
-        if project["general"] and project["general"]["properties"] is dict:
-            properties: dict[str, WallpaperPropertyType] = {}
+        file_name = project.get("file")
+        if isinstance(file_name, str):
+            wallpaper.file = wallpaper_folder / file_name
 
-            for _, (property_name, property_object) in project["general"]["properties"]:
-                if not property_object["type"] is str:
-                    continue
+        general = project.get("general")
+        if isinstance(general, dict):
+            properties_data = general.get("properties")
+            if isinstance(properties_data, dict):
+                properties: dict[str, WallpaperPropertyType] = {}
 
-                if not property_object["text"] is str:
-                    continue
-
-                match property_object["type"]:
-                    case "bool":
-                        if not property_object["value"] is bool:
-                            print(
-                                f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
-                            )
-                            continue
-
-                        property = WallpaperBooleanProperty(
-                            property_object["text"],
-                            property_object["type"],
-                            property_object["value"],
-                        )
-
-                        properties[property_name] = property
-
-                    case "slider":
-                        if (
-                            not property_object["min"] is int
-                            or not property_object["max"] is int
-                            or not property_object["value"] is int
-                            or not property_object["editable"] is bool
-                        ):
-                            print(
-                                f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
-                            )
-                            continue
-
-                        property = WallpaperSliderProperty(
-                            property_object["text"],
-                            property_object["type"],
-                            property_object["min"],
-                            property_object["max"],
-                            property_object["value"],
-                            property_object["editable"],
-                        )
-
-                        properties[property_name] = property
-
-                    case "color":
-                        if not property_object["value"] is str:
-                            continue
-
-                        property = WallpaperColorProperty(
-                            property_object["text"],
-                            property_object["type"],
-                            property_object["value"],
-                        )
-
-                        properties[property_name] = property
-
-                    case "file":
-                        property = WallpaperFileProperty(
-                            property_object["text"], property_object["type"]
-                        )
-
-                        properties[property_name] = property
-
-                    case "combo":
-                        if (
-                            not property_object["options"] is list
-                            or not property_object["value"] is int
-                        ):
-                            print(
-                                f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
-                            )
-                            continue
-
-                        combo_options: List[ComboOptions] = []
-                        for option in property_object["options"]:
-                            if not option["label"] is str or not option["value"] is int:
-                                continue
-
-                            combo_option = ComboOptions(
-                                option["label"], option["value"]
-                            )
-
-                            combo_options.append(combo_option)
-
-                        property = WallpaperComboProperty(
-                            property_object["text"],
-                            property_object["type"],
-                            combo_options,
-                            property_object["value"],
-                        )
-
-                        properties[property_name] = property
-
-                    case "textinput":
-                        if not property_object["value"] is str:
-                            print(
-                                f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
-                            )
-                            continue
-
-                        property = WallpaperTextinputProperty(
-                            property_object["text"],
-                            property_object["type"],
-                            property_object["value"],
-                        )
-
-                        properties[property_name] = property
-
-                    case type:
-                        print(
-                            f"[WallpaperLoader] Warning: property type {type} not implemented yet"
-                        )
+                for property_name, property_object in properties_data.items():
+                    if not isinstance(property_object, dict):
                         continue
 
-            wallpaper.properties = properties
-            if project["monetization"] is bool:
-                wallpaper.monetization = project["monetization"]
+                    prop_type = property_object.get("type")
+                    prop_text = property_object.get("text")
 
-            if project["preview"] is str:
-                wallpaper.preview = wallpaper_folder / project["preview"]
+                    if not isinstance(prop_type, str) or not isinstance(prop_text, str):
+                        continue
 
-            if project["tags"] is list:
-                tags: List[str] = []
+                    match prop_type:
+                        case "bool":
+                            prop_value = property_object.get("value")
+                            if not isinstance(prop_value, bool):
+                                print(
+                                    f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
+                                )
+                                continue
 
-                for tag in project["tags"]:
-                    if tag is str:
-                        tags.append(str(tag))  # pyright is scaring me...
+                            property = WallpaperBooleanProperty(
+                                prop_text,
+                                prop_type,
+                                prop_value,
+                            )
+                            properties[property_name] = property
 
-                wallpaper.tags = tags
+                        case "slider":
+                            prop_min = property_object.get("min")
+                            prop_max = property_object.get("max")
+                            prop_value = property_object.get("value")
+                            prop_editable = property_object.get("editable")
 
-            if not project["type"] is str:
-                print(
-                    f"[WallpaperLoader] Error: Wallpaper {wallpaper_folder} doesn't represent a type"
-                )
-                continue
+                            if (
+                                not isinstance(prop_min, int)
+                                or not isinstance(prop_max, int)
+                                or not isinstance(prop_value, int)
+                                or not isinstance(prop_editable, bool)
+                            ):
+                                print(
+                                    f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
+                                )
+                                continue
 
-            try:
-                wallpaper.type = WallpaperType(project["type"])
-            except Exception:
-                print(
-                    f"[WallpaperLoader] Error: Wallpaper {wallpaper_folder} type ({project["type"]}) is unappropriable"
-                )
-                continue
+                            property = WallpaperSliderProperty(
+                                prop_text,
+                                prop_type,
+                                prop_min,
+                                prop_max,
+                                prop_value,
+                                prop_editable,
+                            )
+                            properties[property_name] = property
 
-            wallpapers.append(wallpaper)
+                        case "color":
+                            prop_value = property_object.get("value")
+                            if not isinstance(prop_value, str):
+                                continue
 
-        project_file.close()
+                            property = WallpaperColorProperty(
+                                prop_text,
+                                prop_type,
+                                prop_value,
+                            )
+                            properties[property_name] = property
+
+                        case "file":
+                            property = WallpaperFileProperty(prop_text, prop_type)
+                            properties[property_name] = property
+
+                        case "combo":
+                            prop_options = property_object.get("options")
+                            prop_value = property_object.get("value")
+
+                            if not isinstance(prop_options, list) or not isinstance(
+                                prop_value, int
+                            ):
+                                print(
+                                    f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
+                                )
+                                continue
+
+                            combo_options: List[ComboOptions] = []
+                            for option in prop_options:
+                                if not isinstance(option, dict):
+                                    continue
+
+                                option_label = option.get("label")
+                                option_value = option.get("value")
+
+                                if not isinstance(option_label, str) or not isinstance(
+                                    option_value, int
+                                ):
+                                    continue
+
+                                combo_option = ComboOptions(option_label, option_value)
+                                combo_options.append(combo_option)
+
+                            property = WallpaperComboProperty(
+                                prop_text,
+                                prop_type,
+                                combo_options,
+                                prop_value,
+                            )
+                            properties[property_name] = property
+
+                        case "textinput":
+                            prop_value = property_object.get("value")
+                            if not isinstance(prop_value, str):
+                                print(
+                                    f"[WallpaperLoader] Warning: property {property_name} for wallpaper {wallpaper_folder} is misstyped"
+                                )
+                                continue
+
+                            property = WallpaperTextinputProperty(
+                                prop_text,
+                                prop_type,
+                                prop_value,
+                            )
+                            properties[property_name] = property
+
+                        case _:
+                            print(
+                                f"[WallpaperLoader] Warning: property type {prop_type} not implemented yet"
+                            )
+                            continue
+
+                wallpaper.properties = properties
+
+        monetization = project.get("monetization")
+        if isinstance(monetization, bool):
+            wallpaper.monetization = monetization
+
+        preview_name = project.get("preview")
+        if isinstance(preview_name, str):
+            wallpaper.preview = wallpaper_folder / preview_name
+
+        tags_data = project.get("tags")
+        if isinstance(tags_data, list):
+            tags: List[str] = []
+            for tag in tags_data:
+                if isinstance(tag, str):
+                    tags.append(tag)
+            wallpaper.tags = tags
+
+        wallpaper_type = project.get("type")
+        if not isinstance(wallpaper_type, str):
+            print(
+                f"[WallpaperLoader] Error: Wallpaper {wallpaper_folder} doesn't represent a type"
+            )
+            continue
+
+        try:
+            wallpaper.type = WallpaperType(wallpaper_type)
+        except Exception:
+            print(
+                f"[WallpaperLoader] Error: Wallpaper {wallpaper_folder} type ({wallpaper_type}) is unappropriable"
+            )
+            continue
+
+        wallpapers.append(wallpaper)
 
     return wallpapers
 
