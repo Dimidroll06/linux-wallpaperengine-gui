@@ -46,7 +46,7 @@ class ComboOptions:
 @dataclass
 class WallpaperComboProperty(WallpaperProperty):
     options: List[ComboOptions]
-    valie: int
+    value: int
 
 
 @dataclass
