@@ -1,5 +1,5 @@
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import List
@@ -75,10 +75,10 @@ class WallpaperType(Enum):
 class Wallpaper:
     contentrating: str = "Everyone"
     file: Path = Path()
-    properties: dict[str, WallpaperPropertyType] = {}
+    properties: dict[str, WallpaperPropertyType] = field(default_factory=lambda: {})
     monetization: bool = False
     preview: Path = Path()
-    tags: List[str] = []
+    tags: List[str] = field(default_factory=lambda: [])
     type: WallpaperType = WallpaperType.SCENE
 
 
