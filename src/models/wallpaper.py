@@ -73,13 +73,13 @@ class WallpaperType(Enum):
 
 @dataclass
 class Wallpaper:
-    contentrating: str
-    file: Path
-    properties: dict[str, WallpaperPropertyType]
-    monetization: bool
-    preview: Path
-    tags: List[str]
-    type: WallpaperType
+    contentrating: str = "Everyone"
+    file: Path = Path()
+    properties: dict[str, WallpaperPropertyType] = {}
+    monetization: bool = False
+    preview: Path = Path()
+    tags: List[str] = []
+    type: WallpaperType = WallpaperType.SCENE
 
 
 class WallpapersModel(QAbstractListModel):
