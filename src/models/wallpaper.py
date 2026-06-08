@@ -1,3 +1,4 @@
+import numbers
 import typing
 from dataclasses import dataclass, field
 from enum import Enum
@@ -21,9 +22,9 @@ class WallpaperBooleanProperty(WallpaperProperty):
 
 @dataclass
 class WallpaperSliderProperty(WallpaperProperty):
-    min: int
-    max: int
-    value: int
+    min: numbers.Number
+    max: numbers.Number
+    value: numbers.Number
     editable: bool
 
 

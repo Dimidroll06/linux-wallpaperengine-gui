@@ -1,4 +1,5 @@
 import json
+import numbers
 from pathlib import Path
 from typing import List
 
@@ -82,9 +83,9 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                             prop_editable = property_object.get("editable")
 
                             if (
-                                not isinstance(prop_min, int)
-                                or not isinstance(prop_max, int)
-                                or not isinstance(prop_value, int)
+                                not isinstance(prop_min, numbers.Number)
+                                or not isinstance(prop_max, numbers.Number)
+                                or not isinstance(prop_value, numbers.Number)
                                 or not isinstance(prop_editable, bool)
                             ):
                                 print(
