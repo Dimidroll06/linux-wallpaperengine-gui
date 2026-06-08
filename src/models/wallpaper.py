@@ -3,7 +3,7 @@ import typing
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from PyQt6.QtCore import (QAbstractListModel, QByteArray, QModelIndex, QObject,
                           Qt)
@@ -41,13 +41,13 @@ class WallpaperFileProperty(WallpaperProperty):
 @dataclass
 class ComboOptions:
     label: str
-    value: int
+    value: Any
 
 
 @dataclass
 class WallpaperComboProperty(WallpaperProperty):
     options: List[ComboOptions]
-    value: int
+    value: Any
 
 
 @dataclass

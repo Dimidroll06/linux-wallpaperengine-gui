@@ -103,13 +103,13 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                             prop_min = property_object.get("min")
                             prop_max = property_object.get("max")
                             prop_value = property_object.get("value")
-                            prop_editable = property_object.get("editable")
+                            prop_editable = property_object.get("editable", False)
 
                             if (
                                 not isinstance(prop_min, numbers.Number)
                                 or not isinstance(prop_max, numbers.Number)
                                 or not isinstance(prop_value, numbers.Number)
-                                or not isinstance(prop_editable, bool)
+                                # or not isinstance(prop_editable, bool)
                             ):
                                 invalid_fields = []
                                 if not isinstance(prop_min, numbers.Number):
@@ -167,15 +167,13 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                             prop_options = property_object.get("options")
                             prop_value = property_object.get("value")
 
-                            if not isinstance(prop_options, list) or not isinstance(
-                                prop_value, int
-                            ):
+                            if not isinstance(prop_options, list) or prop_value is None:
                                 invalid_fields = []
                                 if not isinstance(prop_options, list):
                                     invalid_fields.append(
                                         f"options ({type(prop_options).__name__})"
                                     )
-                                if not isinstance(prop_value, int):
+                                if not prop_value:
                                     invalid_fields.append(
                                         f"value ({type(prop_value).__name__})"
                                     )
@@ -193,18 +191,20 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                     )
                                     continue
 
+                                option: dict = option  # pyright :)
                                 option_label = option.get("label")
                                 option_value = option.get("value")
 
-                                if not isinstance(option_label, str) or not isinstance(
-                                    option_value, int
+                                if (
+                                    not isinstance(option_label, str)
+                                    or option_value is None
                                 ):
                                     invalid_option_fields = []
                                     if not isinstance(option_label, str):
                                         invalid_option_fields.append(
                                             f"label ({type(option_label).__name__})"
                                         )
-                                    if not isinstance(option_value, int):
+                                    if not option_value:
                                         invalid_option_fields.append(
                                             f"value ({type(option_value).__name__})"
                                         )
@@ -292,7 +292,7 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
             continue
 
         try:
-            wallpaper.type = WallpaperType(wallpaper_type)
+            wallpaper.type = WallpaperType(wallpaper_type.lower())
         except ValueError as e:
             print(
                 f"[WallpaperLoader] Error: wallpaper in {wallpaper_folder} has invalid type value '{wallpaper_type}': {e}, skipping"
