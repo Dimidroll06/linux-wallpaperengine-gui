@@ -1,0 +1,72 @@
+/* Общие стили */
+QWidget {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Карточка обоев */
+WallpaperCard {
+    background-color: #2d2d2d;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 5px;
+}
+
+WallpaperCard:hover {
+    border: 2px solid #4a9eff;
+    background-color: #363636;
+}
+
+WallpaperCard:selected {
+    border: 2px solid #0078d4;
+    background-color: #2a2a2a;
+}
+
+/* Превью изображения */
+QLabel#preview_label {
+    background-color: #1a1a1a;
+    border-radius: 4px;
+}
+
+/* Название обоев */
+QLabel#name_label {
+    color: #cccccc;
+    font-size: 12px;
+    padding-top: 5px;
+}
+
+/* Кнопки */
+QPushButton {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 13px;
+}
+
+QPushButton:hover {
+    background-color: #1084d9;
+}
+
+QPushButton:pressed {
+    background-color: #006cbd;
+}
+
+/* Скроллбар */
+QScrollBar:vertical {
+    background-color: #2d2d2d;
+    width: 12px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #555555;
+    border-radius: 6px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #666666;
+}

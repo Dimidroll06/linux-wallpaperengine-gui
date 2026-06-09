@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 from typing import final
 
 from PyQt6.QtGui import QIcon
@@ -21,5 +22,12 @@ class MyApp(QApplication):
             print("Something went wrong")
             sys.exit(1)
 
+        self.load_styles()
         self.main_window = MainWindow()
         self.tray_manager = TrayManager(self.main_window)
+
+    def load_styles(self):
+        style_path = Path(__file__).parent / "resources" / "style.qss"
+        if style_path.exists():
+            with open(style_path, "r", encoding="utf-8") as f:
+                self.setStyleSheet(f.read())
