@@ -27,7 +27,7 @@ class MyApp(QApplication):
 
         self.load_styles()
         self.api = LibraryAPI()
-        self.api.wallpaper_set.connect(self._safe_wallpaper)
+        self.api.wallpaper_set.connect(self._wallpaper_changed)
 
         self.state_manger = StateManager()
         self.state = self.state_manger.load()
@@ -38,9 +38,10 @@ class MyApp(QApplication):
         self.main_window = MainWindow(self.api, self.screens())
         self.tray_manager = TrayManager(self.main_window)
 
-    def _safe_wallpaper(self, args: LibArguments, wallpaper: Wallpaper):
+    def _wallpaper_changed(self, args: LibArguments, wallpaper: Wallpaper):
         self.state.lastArgs = args
         self.state.lastWallpaper = wallpaper
+
         self.state_manger.save(self.state)
 
     def load_styles(self):
