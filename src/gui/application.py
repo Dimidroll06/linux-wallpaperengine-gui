@@ -7,6 +7,7 @@ from PyQt6.QtNetwork import QLocalServer
 from PyQt6.QtWidgets import QApplication
 
 from src.config import APPLICATION_NAME, ICON32_PATH
+from src.core.lib import LibraryAPI
 from src.gui.main_window import MainWindow
 from src.gui.tray import TrayManager
 
@@ -23,7 +24,8 @@ class MyApp(QApplication):
             sys.exit(1)
 
         self.load_styles()
-        self.main_window = MainWindow()
+        self.api = LibraryAPI()
+        self.main_window = MainWindow(self.api, self.screens())
         self.tray_manager = TrayManager(self.main_window)
 
     def load_styles(self):
