@@ -3,7 +3,7 @@ import numbers
 from pathlib import Path
 from typing import List
 
-from src.config import STEAM_WALLPAPER_PATH
+from src.config import STEAM_WALLPAPER_PATH, USE_ONLY_VIDEO_WALLPAPERS
 from src.models.wallpaper import (ComboOptions, Wallpaper,
                                   WallpaperBooleanProperty,
                                   WallpaperColorProperty,
@@ -52,6 +52,29 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
             print(
                 f"[WallpaperLoader] Warning: contentrating has invalid type {type(contentrating).__name__} in {wallpaper_folder}"
             )
+
+        wallpaper_type = project.get("type")
+        if not isinstance(wallpaper_type, str):
+            print(
+                f"[WallpaperLoader] Error: wallpaper in {wallpaper_folder} has invalid type field type {type(wallpaper_type).__name__}, expected str, skipping"
+            )
+            continue
+
+        try:
+            wallpaper.type = WallpaperType(wallpaper_type.lower())
+        except ValueError as e:
+            print(
+                f"[WallpaperLoader] Error: wallpaper in {wallpaper_folder} has invalid type value '{wallpaper_type}': {e}, skipping"
+            )
+            continue
+        except Exception as e:
+            print(
+                f"[WallpaperLoader] Error: unexpected error processing wallpaper type in {wallpaper_folder}: {type(e).__name__}: {e}, skipping"
+            )
+            continue
+
+        if wallpaper.type != WallpaperType.VIDEO and USE_ONLY_VIDEO_WALLPAPERS:
+            continue
 
         file_name = project.get("file")
         if isinstance(file_name, str):
@@ -283,26 +306,6 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
             print(
                 f"[WallpaperLoader] Warning: tags has invalid type {type(tags_data).__name__} in {wallpaper_folder}"
             )
-
-        wallpaper_type = project.get("type")
-        if not isinstance(wallpaper_type, str):
-            print(
-                f"[WallpaperLoader] Error: wallpaper in {wallpaper_folder} has invalid type field type {type(wallpaper_type).__name__}, expected str, skipping"
-            )
-            continue
-
-        try:
-            wallpaper.type = WallpaperType(wallpaper_type.lower())
-        except ValueError as e:
-            print(
-                f"[WallpaperLoader] Error: wallpaper in {wallpaper_folder} has invalid type value '{wallpaper_type}': {e}, skipping"
-            )
-            continue
-        except Exception as e:
-            print(
-                f"[WallpaperLoader] Error: unexpected error processing wallpaper type in {wallpaper_folder}: {type(e).__name__}: {e}, skipping"
-            )
-            continue
 
         wallpapers.append(wallpaper)
 
