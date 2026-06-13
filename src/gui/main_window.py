@@ -1,7 +1,7 @@
 from typing import List, final, override
 
 from PyQt6.QtGui import QCloseEvent, QScreen
-from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.QtWidgets import QMainWindow
 
 from src.core.lib import LibArguments, LibraryAPI, ScalingMode
 from src.gui.widgets.wallpaper_grid import WallpaperGrid
