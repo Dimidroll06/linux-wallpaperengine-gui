@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional, final
 
-from PyQt6.QtCore import QObject, QProcess, QProcessEnvironment
+from pydantic import BaseModel, Field
+from PyQt6.QtCore import QObject, QProcess, pyqtSignal
 
 from src.config import LIBRARY_COMMAND, STEAM_WALLPAPER_PATH
 from src.models.wallpaper import Wallpaper
@@ -22,26 +22,27 @@ class ClampingMode(Enum):
     REPEAT = "repeat"
 
 
-@dataclass
-class LibArguments:
+class LibArguments(BaseModel):
     screen_root: str
     silent: bool = False
     volume: int = 100
     noautomute: bool = False
     no_audio_processing: bool = False
     fps: int = 24
-    scaling: ScalingMode = field(default_factory=lambda: ScalingMode.DEFAULT)
-    clamping: ClampingMode = field(default_factory=lambda: ClampingMode.BORDER)
-    assets_dir: Path = field(default_factory=lambda: STEAM_WALLPAPER_PATH)
+    scaling: ScalingMode = ScalingMode.DEFAULT
+    clamping: ClampingMode = ClampingMode.BORDER
+    assets_dir: Path = STEAM_WALLPAPER_PATH
     disable_mouse: bool = False
     disable_paralax: bool = False
     no_fullscreen_pause: bool = False
     fullscreen_pause_only_active: bool = False
-    fullscreen_api_ignore_app_id: List[int] = field(default_factory=lambda: [])
+    fullscreen_api_ignore_app_id: List[int] = Field(default_factory=list)
 
 
 @final
 class LibraryAPI(QObject):
+
+    wallpaper_set = pyqtSignal(LibArguments, Wallpaper)
 
     def __init__(self, parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
@@ -80,6 +81,7 @@ class LibraryAPI(QObject):
             print(
                 f"[lib] Info: Process succesfully running (PID: {self.process.processId()})"
             )
+            self.wallpaper_set.emit(args, wallpaper)
 
     def take_screenshot(self, save_to: Path, wallpaper: Wallpaper) -> bool:
         process = QProcess(self)
