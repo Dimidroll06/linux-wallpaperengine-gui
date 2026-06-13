@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 APPLICATION_NAME = "linux-wallpaper-engine-gui"
@@ -13,3 +14,8 @@ USE_ONLY_VIDEO_WALLPAPERS = (
     True  # set false to show all wallpapers (many of them not supported yet)
 )
 LIBRARY_COMMAND = "linux-wallpaperengine"
+
+XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME")
+APP_STATE_PATH = (
+    Path(XDG_CONFIG_HOME) if XDG_CONFIG_HOME else Path.home()
+) / ".linux-wallpaper-engine-gui.json"

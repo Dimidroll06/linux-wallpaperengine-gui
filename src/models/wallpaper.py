@@ -1,68 +1,60 @@
-import numbers
 import typing
-from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, List
+from typing import Any, Dict, List, Union
 
+from pydantic import BaseModel, Field, model_validator
 from PyQt6.QtCore import (QAbstractListModel, QByteArray, QModelIndex, QObject,
                           Qt)
 
 
-@dataclass
-class WallpaperProperty:
+class WallpaperProperty(BaseModel):
     text: str
     type: str
 
 
-@dataclass
 class WallpaperBooleanProperty(WallpaperProperty):
     value: bool
 
 
-@dataclass
 class WallpaperSliderProperty(WallpaperProperty):
-    min: numbers.Number
-    max: numbers.Number
-    value: numbers.Number
+    min: float
+    max: float
+    value: float
     editable: bool
 
 
-@dataclass
 class WallpaperColorProperty(WallpaperProperty):
     value: str
 
 
-@dataclass
 class WallpaperFileProperty(WallpaperProperty):
     pass
 
 
-@dataclass
-class ComboOptions:
+class ComboOptions(BaseModel):
     label: str
     value: Any
 
 
-@dataclass
 class WallpaperComboProperty(WallpaperProperty):
     options: List[ComboOptions]
     value: Any
 
 
-@dataclass
 class WallpaperTextinputProperty(WallpaperProperty):
     value: str
 
 
-WallpaperPropertyType = (
-    WallpaperProperty
-    | WallpaperBooleanProperty
-    | WallpaperSliderProperty
-    | WallpaperColorProperty
-    | WallpaperFileProperty
-    | WallpaperComboProperty
-)
+WallpaperPropertyType = Union[
+    WallpaperBooleanProperty,
+    WallpaperSliderProperty,
+    WallpaperColorProperty,
+    WallpaperFileProperty,
+    WallpaperComboProperty,
+    WallpaperTextinputProperty,
+    WallpaperProperty,
+]
 
 
 class WallpaperType(Enum):
@@ -72,15 +64,45 @@ class WallpaperType(Enum):
     APP = "application"
 
 
-@dataclass
-class Wallpaper:
+class Wallpaper(BaseModel):
     contentrating: str = "Everyone"
     file: Path = Path()
-    properties: dict[str, WallpaperPropertyType] = field(default_factory=lambda: {})
+    properties: Dict[str, Any] = Field(default_factory=dict)
     monetization: bool = False
     preview: Path = Path()
-    tags: List[str] = field(default_factory=lambda: [])
+    tags: List[str] = Field(default_factory=list)
     type: WallpaperType = WallpaperType.SCENE
+
+    @model_validator(mode="before")
+    @classmethod
+    def _parse_properties(cls, data: Any) -> Any:
+        if isinstance(data, dict) and "properties" in data:
+            props = data["properties"]
+            if isinstance(props, dict):
+                parsed_props = {}
+                for key, prop_data in props.items():
+                    if isinstance(prop_data, dict):
+                        p_type = prop_data.get("type", "").lower()
+
+                        if p_type == "boolean":
+                            parsed_props[key] = WallpaperBooleanProperty(**prop_data)
+                        elif p_type == "slider":
+                            parsed_props[key] = WallpaperSliderProperty(**prop_data)
+                        elif p_type == "color":
+                            parsed_props[key] = WallpaperColorProperty(**prop_data)
+                        elif p_type == "file":
+                            parsed_props[key] = WallpaperFileProperty(**prop_data)
+                        elif p_type == "combo":
+                            parsed_props[key] = WallpaperComboProperty(**prop_data)
+                        elif p_type == "textinput":
+                            parsed_props[key] = WallpaperTextinputProperty(**prop_data)
+                        else:
+                            parsed_props[key] = WallpaperProperty(**prop_data)
+                    else:
+                        parsed_props[key] = prop_data
+
+                data["properties"] = parsed_props
+        return data
 
 
 class WallpapersModel(QAbstractListModel):

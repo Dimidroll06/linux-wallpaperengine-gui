@@ -1,7 +1,6 @@
 import json
-import numbers
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from src.config import STEAM_WALLPAPER_PATH, USE_ONLY_VIDEO_WALLPAPERS
 from src.models.wallpaper import (ComboOptions, Wallpaper,
@@ -11,6 +10,8 @@ from src.models.wallpaper import (ComboOptions, Wallpaper,
                                   WallpaperFileProperty, WallpaperPropertyType,
                                   WallpaperSliderProperty,
                                   WallpaperTextinputProperty, WallpaperType)
+
+Number = Union[int, float]
 
 
 def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
@@ -116,9 +117,9 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                 continue
 
                             property = WallpaperBooleanProperty(
-                                prop_text,
-                                prop_type,
-                                prop_value,
+                                text=prop_text,
+                                type=prop_type,
+                                value=prop_value,
                             )
                             properties[property_name] = property
 
@@ -129,21 +130,21 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                             prop_editable = property_object.get("editable", False)
 
                             if (
-                                not isinstance(prop_min, numbers.Number)
-                                or not isinstance(prop_max, numbers.Number)
-                                or not isinstance(prop_value, numbers.Number)
+                                not isinstance(prop_min, Number)
+                                or not isinstance(prop_max, Number)
+                                or not isinstance(prop_value, Number)
                                 # or not isinstance(prop_editable, bool)
                             ):
                                 invalid_fields = []
-                                if not isinstance(prop_min, numbers.Number):
+                                if not isinstance(prop_min, Number):
                                     invalid_fields.append(
                                         f"min ({type(prop_min).__name__})"
                                     )
-                                if not isinstance(prop_max, numbers.Number):
+                                if not isinstance(prop_max, Number):
                                     invalid_fields.append(
                                         f"max ({type(prop_max).__name__})"
                                     )
-                                if not isinstance(prop_value, numbers.Number):
+                                if not isinstance(prop_value, Number):
                                     invalid_fields.append(
                                         f"value ({type(prop_value).__name__})"
                                     )
@@ -158,12 +159,12 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                 continue
 
                             property = WallpaperSliderProperty(
-                                prop_text,
-                                prop_type,
-                                prop_min,
-                                prop_max,
-                                prop_value,
-                                prop_editable,
+                                text=prop_text,
+                                type=prop_type,
+                                min=prop_min,
+                                max=prop_max,
+                                value=prop_value,
+                                editable=prop_editable,
                             )
                             properties[property_name] = property
 
@@ -176,14 +177,16 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                 continue
 
                             property = WallpaperColorProperty(
-                                prop_text,
-                                prop_type,
-                                prop_value,
+                                text=prop_text,
+                                type=prop_type,
+                                value=prop_value,
                             )
                             properties[property_name] = property
 
                         case "file":
-                            property = WallpaperFileProperty(prop_text, prop_type)
+                            property = WallpaperFileProperty(
+                                text=prop_text, type=prop_type
+                            )
                             properties[property_name] = property
 
                         case "combo":
@@ -237,14 +240,16 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                     )
                                     continue
 
-                                combo_option = ComboOptions(option_label, option_value)
+                                combo_option = ComboOptions(
+                                    label=option_label, value=option_value
+                                )
                                 combo_options.append(combo_option)
 
                             property = WallpaperComboProperty(
-                                prop_text,
-                                prop_type,
-                                combo_options,
-                                prop_value,
+                                text=prop_text,
+                                type=prop_type,
+                                options=combo_options,
+                                value=prop_value,
                             )
                             properties[property_name] = property
 
@@ -257,9 +262,9 @@ def load_wallpapers(dir: Path = STEAM_WALLPAPER_PATH) -> List[Wallpaper]:
                                 continue
 
                             property = WallpaperTextinputProperty(
-                                prop_text,
-                                prop_type,
-                                prop_value,
+                                text=prop_text,
+                                type=prop_type,
+                                value=prop_value,
                             )
                             properties[property_name] = property
 

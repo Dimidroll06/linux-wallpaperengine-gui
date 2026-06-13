@@ -13,6 +13,7 @@ from src.utils.wallpaper_loader import load_wallpapers
 class MainWindow(QMainWindow):
     def __init__(self, api: LibraryAPI, screens: List[QScreen]):
         super().__init__()
+
         self.force_close = False
         self.api = api
         self.wallpappers = load_wallpapers()
@@ -27,7 +28,9 @@ class MainWindow(QMainWindow):
     def _wallpaper_choosed(self, wallpaper: Wallpaper):
         self.api.exit()
 
-        args = LibArguments(self.screens[0].name(), scaling=ScalingMode.FILL)
+        args = LibArguments(
+            screen_root=self.screens[0].name(), scaling=ScalingMode.FILL
+        )
         self.api.start(args, wallpaper)
 
     @override
